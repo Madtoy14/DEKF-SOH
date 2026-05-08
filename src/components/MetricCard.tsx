@@ -64,7 +64,7 @@ export const MetricCard = ({
             ) : (
                 <div className="mt-auto">
                     <div className="flex items-baseline gap-2">
-                        <span className="text-5xl md:text-6xl font-black text-white tracking-tight drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]">{value}</span>
+                        <span className="text-4xl sm:text-5xl md:text-6xl font-black text-white tracking-tight drop-shadow-[0_0_15px_rgba(255,255,255,0.2)] break-all">{value}</span>
                     </div>
                     {subtext && <p className="text-sm text-cyan-200/70 mt-4 font-medium tracking-wide bg-slate-800/50 px-4 py-1.5 rounded-lg border border-slate-700/50 inline-block">{subtext}</p>}
                 </div>

@@ -9,7 +9,10 @@ export const DataLogTable = ({ logs }: DataLogTableProps) => {
     return (
         <div className="glass-panel p-6 md:p-8 mb-6">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
-                <h2 className="text-xl font-bold text-white tracking-wide">Log Data & Status Alert Terbaru <span className="text-cyan-400 text-sm font-medium ml-2 uppercase tracking-widest">(5 Data Terakhir)</span></h2>
+                <h2 className="text-lg sm:text-xl font-bold text-white tracking-wide">
+                    Log Data & Status Alert Terbaru 
+                    <span className="block sm:inline-block text-cyan-400 text-xs sm:text-sm font-medium sm:ml-2 uppercase tracking-widest mt-1 sm:mt-0">(5 Data Terakhir)</span>
+                </h2>
                 <button className="flex items-center gap-2 bg-slate-800 border border-cyan-500/50 hover:bg-cyan-500/20 text-cyan-300 px-6 py-2.5 rounded-full font-bold transition-all shadow-[0_0_15px_rgba(6,182,212,0.2)] hover:shadow-[0_0_25px_rgba(6,182,212,0.4)] hover:-translate-y-0.5">
                     <Download className="w-4 h-4" />
                     Export Data (.XLSX)

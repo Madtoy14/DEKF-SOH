@@ -102,7 +102,10 @@ export const RealtimeChart = ({ data }: RealtimeChartProps) => {
 
     return (
         <div className="glass-panel p-6 md:p-8 mb-6">
-            <h2 className="text-xl font-bold mb-6 text-white tracking-wide">Tren Real-time: Tegangan vs SOC <span className="text-cyan-400 text-sm font-medium ml-2 uppercase tracking-widest">(1 Jam Terakhir)</span></h2>
+            <h2 className="text-lg sm:text-xl font-bold mb-4 sm:mb-6 text-white tracking-wide">
+                Tren Real-time: Tegangan vs SOC 
+                <span className="block sm:inline-block text-cyan-400 text-xs sm:text-sm font-medium sm:ml-2 uppercase tracking-widest mt-1 sm:mt-0">(1 Jam Terakhir)</span>
+            </h2>
             <div className="h-[350px]">
                 <Chart options={options} series={series} type="area" height="100%" />
             </div>
