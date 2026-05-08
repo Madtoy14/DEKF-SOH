@@ -1,11 +1,11 @@
 import { AlertTriangle } from 'lucide-react';
 
 interface StatusBannerProps {
-    voltage: number;
+    tegangan: number;
 }
 
-export const StatusBanner = ({ voltage }: StatusBannerProps) => {
-    if (voltage >= 11.5) return null; // Only show when critical
+export const StatusBanner = ({ tegangan }: StatusBannerProps) => {
+    if (tegangan >= 11.5) return null; // Only show when critical
 
     return (
         <div className="w-full bg-red-950/40 border border-red-500/50 rounded-[2rem] p-6 mb-8 flex items-center justify-between shadow-[0_0_30px_rgba(239,68,68,0.2)] backdrop-blur-md animate-pulse">

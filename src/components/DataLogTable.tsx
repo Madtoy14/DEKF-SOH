@@ -33,9 +33,9 @@ export const DataLogTable = ({ logs }: DataLogTableProps) => {
                         {logs.slice(0, 5).map((log) => (
                             <tr key={log.id} className="border-b border-slate-700/30 hover:bg-slate-800/50 transition-colors group">
                                 <td className="py-4 px-4 text-cyan-200/70 font-mono text-xs group-hover:text-cyan-300 transition-colors">{log.timestamp}</td>
-                                <td className="py-4 px-4 font-bold text-white group-hover:text-cyan-100 transition-colors">{log.voltage.toFixed(2)}</td>
-                                <td className="py-4 px-4 text-slate-300">{log.current.toFixed(2)}</td>
-                                <td className="py-4 px-4 text-slate-300">{log.soc}</td>
+                                <td className="py-4 px-4 font-bold text-white group-hover:text-cyan-100 transition-colors">{log.tegangan.toFixed(2)}</td>
+                                <td className="py-4 px-4 text-slate-300">{log.arus.toFixed(2)}</td>
+                                <td className="py-4 px-4 text-slate-300">{log.soc_dekf}</td>
                                 <td className="py-4 px-4 text-slate-300">{log.r0_estimasi ? log.r0_estimasi.toFixed(4) : 0}</td>
                                 <td className="py-4 px-4">
                                     <span className={`px-3 py-1.5 rounded-md text-xs font-bold shadow-[0_0_10px_rgba(0,0,0,0.3)] border ${log.status === 'Discharging' ? 'bg-amber-500/10 text-amber-400 border-amber-500/30' : 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30'}`}>

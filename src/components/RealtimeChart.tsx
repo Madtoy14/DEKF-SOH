@@ -92,11 +92,11 @@ export const RealtimeChart = ({ data }: RealtimeChartProps) => {
     const series = [
         {
             name: 'Tegangan',
-            data: data.map(d => d.voltage)
+            data: data.map(d => d.tegangan)
         },
         {
             name: 'SOC',
-            data: data.map(d => d.soc)
+            data: data.map(d => d.soc_dekf)
         }
     ];
 

@@ -15,20 +15,20 @@ function App() {
       <div className="max-w-[1400px] mx-auto space-y-8">
         <Header />
 
-        <StatusBanner voltage={data.voltage} />
+        <StatusBanner tegangan={data.tegangan} />
 
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 md:gap-8 mb-8">
           <MetricCard
             id="tegangan-val"
             title="Tegangan Terminal"
-            value={`${data.voltage.toFixed(2)} V`}
+            value={`${data.tegangan.toFixed(2)} V`}
             icon={<Zap className="w-6 h-6" />}
-            label={data.voltage < 11.5 ? { text: 'Tegangan Rendah', type: 'danger' } : undefined}
+            label={data.tegangan < 11.5 ? { text: 'Tegangan Rendah', type: 'danger' } : undefined}
           />
           <MetricCard
             id="arus-val"
             title="Arus Beban"
-            value={`${data.current.toFixed(2)} A`}
+            value={`${data.arus.toFixed(2)} A`}
             icon={<ArrowDown className="w-6 h-6" />}
           />
           <MetricCard
@@ -40,9 +40,9 @@ function App() {
           <MetricCard
             id="soc-val"
             title="State of Charge (SOC)"
-            progress={data.soc}
-            progressColor={data.soc > 50 ? '#06b6d4' : data.soc > 20 ? '#f59e0b' : '#ef4444'} // cyan, amber, red
-            subtext={data.soc > 50 ? 'Kondisi: Aman' : 'Kondisi: Siaga'}
+            progress={data.soc_dekf}
+            progressColor={data.soc_dekf > 50 ? '#06b6d4' : data.soc_dekf > 20 ? '#f59e0b' : '#ef4444'} // cyan, amber, red
+            subtext={data.soc_dekf > 50 ? 'Kondisi: Aman' : 'Kondisi: Siaga'}
           />
           <MetricCard
             id="soh-val"
