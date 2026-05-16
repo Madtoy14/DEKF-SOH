@@ -5,7 +5,7 @@ import 'react-circular-progressbar/dist/styles.css';
 interface MetricCardProps {
     id?: string;
     title: string;
-    value?: string | number;
+    value?: ReactNode;
     subtext?: string;
     icon?: ReactNode;
     label?: { text: string; type: 'danger' | 'warning' | 'info' };

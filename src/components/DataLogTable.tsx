@@ -1,4 +1,5 @@
 import { Download } from 'lucide-react';
+import * as XLSX from 'xlsx';
 import type { LogEntry } from '../hooks/useBatteryData';
 
 interface DataLogTableProps {
@@ -6,6 +7,27 @@ interface DataLogTableProps {
 }
 
 export const DataLogTable = ({ logs }: DataLogTableProps) => {
+    const exportToExcel = () => {
+        if (!logs || logs.length === 0) return;
+
+        const dataToExport = logs.slice(0, 5).map(log => ({
+            'Timestamp': log.timestamp,
+            'Tegangan (V)': log.tegangan.toFixed(2),
+            'Arus (A)': log.arus.toFixed(2),
+            'SOC (%)': log.soc_dekf,
+            'Resistansi (Ω)': log.r0_estimasi ? log.r0_estimasi.toFixed(4) : 0,
+            'Status': log.status,
+            'Alert Level': log.alertLevel
+        }));
+
+        const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Log Data");
+
+        const dateStr = new Date().toISOString().replace(/[:.]/g, '-');
+        XLSX.writeFile(workbook, `Log_Baterai_BMKG_${dateStr}.xlsx`);
+    };
+
     return (
         <div className="glass-panel p-6 md:p-8 mb-6">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
@@ -13,7 +35,10 @@ export const DataLogTable = ({ logs }: DataLogTableProps) => {
                     Log Data & Status Alert Terbaru 
                     <span className="block sm:inline-block text-cyan-400 text-xs sm:text-sm font-medium sm:ml-2 uppercase tracking-widest mt-1 sm:mt-0">(5 Data Terakhir)</span>
                 </h2>
-                <button className="flex items-center gap-2 bg-slate-800 border border-cyan-500/50 hover:bg-cyan-500/20 text-cyan-300 px-6 py-2.5 rounded-full font-bold transition-all shadow-[0_0_15px_rgba(6,182,212,0.2)] hover:shadow-[0_0_25px_rgba(6,182,212,0.4)] hover:-translate-y-0.5">
+                <button 
+                    onClick={exportToExcel}
+                    className="flex items-center gap-2 bg-slate-800 border border-cyan-500/50 hover:bg-cyan-500/20 text-cyan-300 px-6 py-2.5 rounded-full font-bold transition-all shadow-[0_0_15px_rgba(6,182,212,0.2)] hover:shadow-[0_0_25px_rgba(6,182,212,0.4)] hover:-translate-y-0.5"
+                >
                     <Download className="w-4 h-4" />
                     Export Data (.XLSX)
                 </button>

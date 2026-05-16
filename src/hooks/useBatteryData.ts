@@ -8,7 +8,7 @@ export interface BatteryData {
   r0_estimasi: number;
   status: string;
   suhu: number | null;
-  estimasiString: string;
+  estimasiString: { jam: number; menit: number; standby: boolean };
   soh: number;
 }
 
@@ -30,12 +30,12 @@ export interface ChartDataPoint {
 }
 
 const calculateEstimasi = (soc: number, arus: number) => {
-  if (arus <= 0) return "Standby";
+  if (arus <= 0) return { jam: 0, menit: 0, standby: true };
   const kapasitasTersisa = 42.0 * (soc / 100);
   const estimasiJam = kapasitasTersisa / arus;
   const jam = Math.floor(estimasiJam);
   const menit = Math.floor((estimasiJam - jam) * 60);
-  return `${jam} Jam ${menit} Menit`;
+  return { jam, menit, standby: false };
 };
 
 const calculateSOH = (r0: number) => {
@@ -52,12 +52,25 @@ export const useBatteryData = () => {
     r0_estimasi: 0,
     status: '-',
     suhu: null,
-    estimasiString: 'Standby',
+    estimasiString: { jam: 0, menit: 0, standby: true },
     soh: 100,
   });
 
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [chartData, setChartData] = useState<ChartDataPoint[]>([]);
+  
+  const [lastUpdateDate, setLastUpdateDate] = useState<Date | null>(null);
+  const [isOnline, setIsOnline] = useState<boolean>(false);
+
+  const checkOnlineStatus = (latestDate: Date | null) => {
+    if (!latestDate) {
+       setIsOnline(false);
+       return;
+    }
+    const now = new Date();
+    const diffSeconds = (now.getTime() - latestDate.getTime()) / 1000;
+    setIsOnline(diffSeconds < 60); // 60 seconds threshold for online status
+  };
 
   const fetchLatestData = async () => {
     const { data: fetchResult, error } = await supabase
@@ -79,7 +92,7 @@ export const useBatteryData = () => {
           return {
             time,
             tegangan: item.tegangan || 0,
-            soc_dekf: item.soc_dekf || 0
+            soc_dekf: Math.round(item.soc_dekf || 0) // Format to integer
           };
       });
       setChartData(newChartData);
@@ -89,7 +102,7 @@ export const useBatteryData = () => {
          timestamp: new Date(item.created_at).toLocaleTimeString([], { hour12: false }),
          tegangan: item.tegangan || 0,
          arus: item.arus || 0,
-         soc_dekf: item.soc_dekf || 0,
+         soc_dekf: Math.round(item.soc_dekf || 0), // Format to integer
          r0_estimasi: item.r0_estimasi || 0,
          status: item.status || '-',
          alertLevel: (item.tegangan || 0) < 11.5 ? 'CRITICAL' : 'NORMAL'
@@ -104,18 +117,39 @@ export const useBatteryData = () => {
       setData({
         tegangan: latest.tegangan || 0,
         arus: arusVal,
-        soc_dekf: socVal,
+        soc_dekf: Math.round(socVal), // Format to integer
         r0_estimasi: r0Val,
         status: latest.status || '-',
         suhu: latest.suhu !== undefined && latest.suhu !== null ? latest.suhu : null,
         estimasiString: calculateEstimasi(socVal, arusVal),
         soh: calculateSOH(r0Val)
       });
+
+      const latestDate = new Date(latest.created_at);
+      setLastUpdateDate(latestDate);
+      checkOnlineStatus(latestDate);
     }
   };
 
   useEffect(() => {
+    // Check status every second
+    const statusInterval = setInterval(() => {
+      setLastUpdateDate(prev => {
+        checkOnlineStatus(prev);
+        return prev;
+      });
+    }, 1000);
+
+    return () => clearInterval(statusInterval);
+  }, []);
+
+  useEffect(() => {
     fetchLatestData();
+
+    // Auto refresh data every 10 seconds as fallback
+    const dataInterval = setInterval(() => {
+      fetchLatestData();
+    }, 10000);
 
     const channel = supabase
       .channel('schema-db-changes')
@@ -133,7 +167,7 @@ export const useBatteryData = () => {
           setData({
             tegangan: newEntry.tegangan || 0,
             arus: arusVal,
-            soc_dekf: socVal,
+            soc_dekf: Math.round(socVal), // Format to integer
             r0_estimasi: r0Val,
             status: newEntry.status || '-',
             suhu: newEntry.suhu !== undefined && newEntry.suhu !== null ? newEntry.suhu : null,
@@ -142,7 +176,7 @@ export const useBatteryData = () => {
           });
 
           setChartData(prev => {
-            const updated = [...prev, { time, tegangan: newEntry.tegangan || 0, soc_dekf: newEntry.soc_dekf || 0 }];
+            const updated = [...prev, { time, tegangan: newEntry.tegangan || 0, soc_dekf: Math.round(socVal) }];
             if (updated.length > 20) return updated.slice(updated.length - 20);
             return updated;
           });
@@ -153,7 +187,7 @@ export const useBatteryData = () => {
                timestamp: time,
                tegangan: newEntry.tegangan || 0,
                arus: newEntry.arus || 0,
-               soc_dekf: newEntry.soc_dekf || 0,
+               soc_dekf: Math.round(socVal), // Format to integer
                r0_estimasi: newEntry.r0_estimasi || 0,
                status: newEntry.status || '-',
                alertLevel: (newEntry.tegangan || 0) < 11.5 ? 'CRITICAL' : 'NORMAL'
@@ -161,14 +195,19 @@ export const useBatteryData = () => {
             const updatedLogs = [newLog, ...prev];
             return updatedLogs.slice(0, 5);
           });
+
+          const latestDate = new Date(newEntry.created_at);
+          setLastUpdateDate(latestDate);
+          checkOnlineStatus(latestDate);
         }
       )
       .subscribe();
 
     return () => {
+      clearInterval(dataInterval);
       supabase.removeChannel(channel);
     };
   }, []);
 
-  return { data, logs, chartData };
+  return { data, logs, chartData, isOnline, lastUpdateDate };
 };

@@ -8,12 +8,12 @@ import { DataLogTable } from './components/DataLogTable';
 import { useBatteryData } from './hooks/useBatteryData';
 
 function App() {
-  const { data, logs, chartData } = useBatteryData();
+  const { data, logs, chartData, isOnline, lastUpdateDate } = useBatteryData();
 
   return (
     <div className="min-h-screen p-4 md:p-6 lg:p-8 selection:bg-cyan-500/30">
       <div className="max-w-[1400px] mx-auto space-y-8">
-        <Header />
+        <Header isOnline={isOnline} lastUpdateDate={lastUpdateDate} />
 
         <StatusBanner tegangan={data.tegangan} />
 
@@ -34,7 +34,18 @@ function App() {
           <MetricCard
             id="estimasi-val"
             title="Estimasi Bertahan"
-            value={data.estimasiString}
+            value={
+              data.estimasiString.standby ? (
+                "Standby"
+              ) : (
+                <div className="flex items-baseline gap-1">
+                  <span className="text-4xl sm:text-5xl md:text-6xl font-black text-white">{data.estimasiString.jam}</span>
+                  <span className="text-sm text-cyan-200/70 font-bold uppercase tracking-wider">Jam</span>
+                  <span className="text-4xl sm:text-5xl md:text-6xl font-black text-white ml-2">{data.estimasiString.menit}</span>
+                  <span className="text-sm text-cyan-200/70 font-bold uppercase tracking-wider">Mnt</span>
+                </div>
+              )
+            }
             icon={<Hourglass className="w-6 h-6" />}
           />
           <MetricCard

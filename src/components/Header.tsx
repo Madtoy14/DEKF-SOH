@@ -1,6 +1,32 @@
-import { Activity } from 'lucide-react';
+import { Activity, WifiOff } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
-export const Header = () => {
+interface HeaderProps {
+    isOnline?: boolean;
+    lastUpdateDate?: Date | null;
+}
+
+export const Header = ({ isOnline = false, lastUpdateDate = null }: HeaderProps) => {
+    const [timeAgo, setTimeAgo] = useState<string>('Waiting for data...');
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            if (!lastUpdateDate) {
+                setTimeAgo('Waiting for data...');
+                return;
+            }
+            const diffSeconds = Math.floor((new Date().getTime() - lastUpdateDate.getTime()) / 1000);
+            if (diffSeconds < 60) {
+                setTimeAgo(`${diffSeconds}s ago`);
+            } else if (diffSeconds < 3600) {
+                setTimeAgo(`${Math.floor(diffSeconds / 60)}m ago`);
+            } else {
+                setTimeAgo(`${Math.floor(diffSeconds / 3600)}h ago`);
+            }
+        }, 1000);
+        return () => clearInterval(interval);
+    }, [lastUpdateDate]);
+
     return (
         <header className="flex flex-col xl:flex-row justify-between items-start xl:items-center bg-slate-900/60 backdrop-blur-xl border-b border-slate-700/50 p-6 md:p-8 rounded-[2rem] shadow-[0_4px_30px_rgba(0,0,0,0.5)] mb-8 relative overflow-hidden gap-6 xl:gap-0">
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cyan-500 via-emerald-500 to-transparent"></div>
@@ -32,13 +58,15 @@ export const Header = () => {
             </div>
 
             <div className="flex flex-col items-start xl:items-end relative z-10 w-full xl:w-auto">
-                <div className="flex items-center gap-3 bg-emerald-500/10 border border-emerald-500/30 px-5 py-2.5 rounded-full shadow-[0_0_15px_rgba(16,185,129,0.1)]">
-                    <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.8)]"></div>
-                    <span className="text-emerald-400 font-bold text-sm tracking-widest uppercase">Status: Online</span>
+                <div className={`flex items-center gap-3 px-5 py-2.5 rounded-full border transition-colors duration-300 ${isOnline ? 'bg-emerald-500/10 border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.1)]' : 'bg-red-500/10 border-red-500/30 shadow-[0_0_15px_rgba(239,68,68,0.1)]'}`}>
+                    <div className={`w-2.5 h-2.5 rounded-full ${isOnline ? 'bg-emerald-400 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.8)]' : 'bg-red-400 shadow-[0_0_10px_rgba(239,68,68,0.8)]'}`}></div>
+                    <span className={`font-bold text-sm tracking-widest uppercase ${isOnline ? 'text-emerald-400' : 'text-red-400'}`}>
+                        Status: {isOnline ? 'Online' : 'Offline'}
+                    </span>
                 </div>
-                <p className="text-slate-400 text-xs mt-3 font-semibold flex items-center gap-1.5 tracking-wide">
-                    <Activity className="w-3.5 h-3.5 text-cyan-400" />
-                    Last sync: 1s ago
+                <p className={`text-xs mt-3 font-semibold flex items-center gap-1.5 tracking-wide ${isOnline ? 'text-slate-400' : 'text-red-300/70'}`}>
+                    {isOnline ? <Activity className="w-3.5 h-3.5 text-cyan-400" /> : <WifiOff className="w-3.5 h-3.5 text-red-400" />}
+                    Last sync: {timeAgo}
                 </p>
             </div>
         </header>
