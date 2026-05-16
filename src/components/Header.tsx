@@ -52,7 +52,7 @@ export const Header = ({ isOnline = false, lastUpdateDate = null }: HeaderProps)
                         Sistem Monitoring Baterai AWS - BMKG
                     </h1>
                     <p className="text-cyan-100/60 text-xs sm:text-sm mt-1 sm:mt-2 font-semibold tracking-wide">
-                        Stasiun: AWS Geofisika Tangerang | Lokasi: Lat: -6.17, Long: 106.64
+                        AWS BMKG Pusat | Lokasi: -6.15, Long: 106.84
                     </p>
                 </div>
             </div>

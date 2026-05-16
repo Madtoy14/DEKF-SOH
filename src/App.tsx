@@ -71,7 +71,7 @@ function App() {
           />
         </div>
 
-        <AlertPanel />
+        <AlertPanel tegangan={data.tegangan} soc={data.soc_dekf} soh={data.soh} />
 
         <RealtimeChart data={chartData} />
 
