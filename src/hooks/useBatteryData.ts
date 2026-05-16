@@ -113,6 +113,10 @@ export const useBatteryData = () => {
       const arusVal = latest.arus || 0;
       const socVal = latest.soc_dekf || 0;
       const r0Val = latest.r0_estimasi || 0;
+      // Prioritize soh from DB, fallback to local calculation
+      const sohVal = (latest.soh !== null && latest.soh !== undefined)
+        ? Math.min(Math.max(Math.round(latest.soh), 0), 100)
+        : calculateSOH(r0Val);
       
       setData({
         tegangan: latest.tegangan || 0,
@@ -122,7 +126,7 @@ export const useBatteryData = () => {
         status: latest.status || '-',
         suhu: latest.suhu !== undefined && latest.suhu !== null ? latest.suhu : null,
         estimasiString: calculateEstimasi(socVal, arusVal),
-        soh: calculateSOH(r0Val)
+        soh: sohVal
       });
 
       const latestDate = new Date(latest.created_at);
@@ -163,6 +167,10 @@ export const useBatteryData = () => {
           const arusVal = newEntry.arus || 0;
           const socVal = newEntry.soc_dekf || 0;
           const r0Val = newEntry.r0_estimasi || 0;
+          // Prioritize soh from DB, fallback to local calculation
+          const sohVal = (newEntry.soh !== null && newEntry.soh !== undefined)
+            ? Math.min(Math.max(Math.round(newEntry.soh), 0), 100)
+            : calculateSOH(r0Val);
 
           setData({
             tegangan: newEntry.tegangan || 0,
@@ -172,7 +180,7 @@ export const useBatteryData = () => {
             status: newEntry.status || '-',
             suhu: newEntry.suhu !== undefined && newEntry.suhu !== null ? newEntry.suhu : null,
             estimasiString: calculateEstimasi(socVal, arusVal),
-            soh: calculateSOH(r0Val)
+            soh: sohVal
           });
 
           setChartData(prev => {
