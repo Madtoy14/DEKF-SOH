@@ -2,6 +2,7 @@ import { Zap, ArrowDown, Hourglass, Thermometer } from 'lucide-react';
 import { Header } from './components/Header';
 import { StatusBanner } from './components/StatusBanner';
 import { MetricCard } from './components/MetricCard';
+import { BatteryStatusCard } from './components/BatteryStatusCard';
 import { AlertPanel } from './components/AlertPanel';
 import { RealtimeChart } from './components/RealtimeChart';
 import { DataLogTable } from './components/DataLogTable';
@@ -62,6 +63,10 @@ function App() {
             progressColor={data.soh > 80 ? '#10b981' : data.soh > 60 ? '#f59e0b' : '#ef4444'} // emerald, amber, red
             label={data.soh < 60 ? { text: 'Maintenance Required', type: 'warning' } : undefined}
             subtext={data.soh > 80 ? 'Kondisi: Optimal' : data.soh > 60 ? 'Kondisi: Wajar' : 'Kondisi: Perlu Penggantian'}
+          />
+          <BatteryStatusCard
+            id="status-val"
+            status={data.status}
           />
           <MetricCard
             id="suhu-val"
