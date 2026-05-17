@@ -2,7 +2,6 @@ import { Zap, ArrowDown, Hourglass, Thermometer } from 'lucide-react';
 import { Header } from './components/Header';
 import { StatusBanner } from './components/StatusBanner';
 import { MetricCard } from './components/MetricCard';
-import { BatteryStatusCard } from './components/BatteryStatusCard';
 import { AlertPanel } from './components/AlertPanel';
 import { RealtimeChart } from './components/RealtimeChart';
 import { DataLogTable } from './components/DataLogTable';
@@ -14,7 +13,7 @@ function App() {
   return (
     <div className="min-h-screen p-4 md:p-6 lg:p-8 selection:bg-cyan-500/30">
       <div className="max-w-[1400px] mx-auto space-y-8">
-        <Header isOnline={isOnline} lastUpdateDate={lastUpdateDate} />
+        <Header isOnline={isOnline} lastUpdateDate={lastUpdateDate} batteryStatus={data.status} />
 
         <StatusBanner tegangan={data.tegangan} />
 
@@ -36,7 +35,12 @@ function App() {
             id="estimasi-val"
             title="Estimasi Bertahan"
             value={
-              data.estimasiString.standby ? (
+              data.estimasiString.charging ? (
+                <div className="flex items-center gap-2">
+                  <Zap className="w-8 h-8 text-emerald-400 animate-pulse" />
+                  <span className="text-3xl sm:text-4xl font-black text-emerald-400">Charging</span>
+                </div>
+              ) : data.estimasiString.standby ? (
                 "Standby"
               ) : (
                 <div className="flex items-baseline gap-1">
@@ -63,10 +67,6 @@ function App() {
             progressColor={data.soh > 80 ? '#10b981' : data.soh > 60 ? '#f59e0b' : '#ef4444'} // emerald, amber, red
             label={data.soh < 60 ? { text: 'Maintenance Required', type: 'warning' } : undefined}
             subtext={data.soh > 80 ? 'Kondisi: Optimal' : data.soh > 60 ? 'Kondisi: Wajar' : 'Kondisi: Perlu Penggantian'}
-          />
-          <BatteryStatusCard
-            id="status-val"
-            status={data.status}
           />
           <MetricCard
             id="suhu-val"

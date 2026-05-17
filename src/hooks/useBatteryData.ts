@@ -8,7 +8,7 @@ export interface BatteryData {
   r0_estimasi: number;
   status: string;
   suhu: number | null;
-  estimasiString: { jam: number; menit: number; standby: boolean };
+  estimasiString: { jam: number; menit: number; standby: boolean; charging: boolean };
   soh: number;
 }
 
@@ -29,13 +29,19 @@ export interface ChartDataPoint {
   soc_dekf: number;
 }
 
-const calculateEstimasi = (soc: number, arus: number) => {
-  if (arus <= 0) return { jam: 0, menit: 0, standby: true };
+const calculateEstimasi = (soc: number, arus: number, status: string) => {
+  const s = status?.trim().toLowerCase();
+  // Charging: arus negatif dari firmware — tampilkan label khusus, bukan jam
+  if (s === 'charging') return { jam: 0, menit: 0, standby: false, charging: true };
+  // Resting atau arus mendekati nol
+  if (Math.abs(arus) < 0.05) return { jam: 0, menit: 0, standby: true, charging: false };
+  // Discharging: hitung sisa waktu pakai nilai absolut arus
+  const absArus = Math.abs(arus);
   const kapasitasTersisa = 42.0 * (soc / 100);
-  const estimasiJam = kapasitasTersisa / arus;
+  const estimasiJam = kapasitasTersisa / absArus;
   const jam = Math.floor(estimasiJam);
   const menit = Math.floor((estimasiJam - jam) * 60);
-  return { jam, menit, standby: false };
+  return { jam, menit, standby: false, charging: false };
 };
 
 const calculateSOH = (r0: number) => {
@@ -52,7 +58,7 @@ export const useBatteryData = () => {
     r0_estimasi: 0,
     status: '-',
     suhu: null,
-    estimasiString: { jam: 0, menit: 0, standby: true },
+    estimasiString: { jam: 0, menit: 0, standby: true, charging: false },
     soh: 100,
   });
 
@@ -125,7 +131,7 @@ export const useBatteryData = () => {
         r0_estimasi: r0Val,
         status: latest.status || '-',
         suhu: latest.suhu !== undefined && latest.suhu !== null ? latest.suhu : null,
-        estimasiString: calculateEstimasi(socVal, arusVal),
+        estimasiString: calculateEstimasi(socVal, arusVal, latest.status || '-'),
         soh: sohVal
       });
 
@@ -179,7 +185,7 @@ export const useBatteryData = () => {
             r0_estimasi: r0Val,
             status: newEntry.status || '-',
             suhu: newEntry.suhu !== undefined && newEntry.suhu !== null ? newEntry.suhu : null,
-            estimasiString: calculateEstimasi(socVal, arusVal),
+            estimasiString: calculateEstimasi(socVal, arusVal, newEntry.status || '-'),
             soh: sohVal
           });
 
