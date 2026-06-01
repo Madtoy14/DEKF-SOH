@@ -1,6 +1,5 @@
-import { Activity, WifiOff, Zap, TrendingDown, Pause, Settings } from 'lucide-react';
+import { Activity, WifiOff, Zap, TrendingDown, Pause } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { SettingsModal } from './SettingsModal';
 
 interface HeaderProps {
     isOnline?: boolean;
@@ -10,7 +9,6 @@ interface HeaderProps {
 
 export const Header = ({ isOnline = false, lastUpdateDate = null, batteryStatus = '-' }: HeaderProps) => {
     const [timeAgo, setTimeAgo] = useState<string>('Waiting for data...');
-    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
     useEffect(() => {
         const interval = setInterval(() => {
@@ -61,24 +59,12 @@ export const Header = ({ isOnline = false, lastUpdateDate = null, batteryStatus 
             </div>
 
             <div className="flex flex-col items-start xl:items-end relative z-10 w-full xl:w-auto gap-3">
-                {/* Top row of right section: Settings & Online/Offline */}
-                <div className="flex items-center gap-3 self-end xl:self-auto">
-                    {/* Tombol Settings */}
-                    <button 
-                        onClick={() => setIsSettingsOpen(true)}
-                        className="p-2.5 bg-slate-800/50 hover:bg-slate-700 border border-slate-700/50 rounded-full text-slate-400 hover:text-cyan-400 transition-all shadow-[0_0_10px_rgba(0,0,0,0.2)]"
-                        title="Setting Kapasitas Baterai"
-                    >
-                        <Settings className="w-4 h-4" />
-                    </button>
-
-                    {/* Badge Online/Offline */}
-                    <div className={`flex items-center gap-3 px-5 py-2.5 rounded-full border transition-colors duration-300 ${isOnline ? 'bg-emerald-500/10 border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.1)]' : 'bg-red-500/10 border-red-500/30 shadow-[0_0_15px_rgba(239,68,68,0.1)]'}`}>
-                        <div className={`w-2.5 h-2.5 rounded-full ${isOnline ? 'bg-emerald-400 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.8)]' : 'bg-red-400 shadow-[0_0_10px_rgba(239,68,68,0.8)]'}`}></div>
-                        <span className={`font-bold text-sm tracking-widest uppercase ${isOnline ? 'text-emerald-400' : 'text-red-400'}`}>
-                            {isOnline ? 'Online' : 'Offline'}
-                        </span>
-                    </div>
+                {/* Badge Online/Offline */}
+                <div className={`flex items-center gap-3 px-5 py-2.5 rounded-full border transition-colors duration-300 ${isOnline ? 'bg-emerald-500/10 border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.1)]' : 'bg-red-500/10 border-red-500/30 shadow-[0_0_15px_rgba(239,68,68,0.1)]'}`}>
+                    <div className={`w-2.5 h-2.5 rounded-full ${isOnline ? 'bg-emerald-400 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.8)]' : 'bg-red-400 shadow-[0_0_10px_rgba(239,68,68,0.8)]'}`}></div>
+                    <span className={`font-bold text-sm tracking-widest uppercase ${isOnline ? 'text-emerald-400' : 'text-red-400'}`}>
+                        {isOnline ? 'Online' : 'Offline'}
+                    </span>
                 </div>
 
                 {/* Badge Status Baterai */}
@@ -116,8 +102,6 @@ export const Header = ({ isOnline = false, lastUpdateDate = null, batteryStatus 
                     Last sync: {timeAgo}
                 </p>
             </div>
-            
-            <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
         </header>
     );
 };
