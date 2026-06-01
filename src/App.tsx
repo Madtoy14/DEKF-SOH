@@ -1,5 +1,5 @@
 import { Zap, ArrowDown, Hourglass, Thermometer, Settings } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Header } from './components/Header';
 import { StatusBanner } from './components/StatusBanner';
 import { MetricCard } from './components/MetricCard';
@@ -8,10 +8,28 @@ import { RealtimeChart } from './components/RealtimeChart';
 import { DataLogTable } from './components/DataLogTable';
 import { useBatteryData } from './hooks/useBatteryData';
 import { SettingsModal } from './components/SettingsModal';
+import { supabase } from './lib/supabase';
 
 function App() {
   const { data, logs, chartData, isOnline, lastUpdateDate } = useBatteryData();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [qNominal, setQNominal] = useState<number | null>(null);
+
+  const fetchConfig = async () => {
+    const { data: configData } = await supabase.from('config_baterai').select('q_nominal').eq('id', 1).single();
+    if (configData) {
+      setQNominal(configData.q_nominal);
+    }
+  };
+
+  useEffect(() => {
+    fetchConfig();
+  }, []);
+
+  const handleCloseSettings = () => {
+    setIsSettingsOpen(false);
+    fetchConfig();
+  };
 
   return (
     <div className="min-h-screen p-4 md:p-6 lg:p-8 selection:bg-cyan-500/30">
@@ -31,7 +49,9 @@ function App() {
                     <Settings className="w-6 h-6 md:w-8 md:h-8" />
                 </div>
                 <div>
-                    <h3 className="text-lg md:text-xl font-bold text-slate-100 group-hover:text-cyan-300 transition-colors">Setting Kapasitas Baterai</h3>
+                    <h3 className="text-lg md:text-xl font-bold text-slate-100 group-hover:text-cyan-300 transition-colors">
+                      Kapasitas Baterai: {qNominal !== null ? <span className="text-cyan-400">{qNominal} Ah</span> : <span className="text-slate-500 animate-pulse">Memuat...</span>}
+                    </h3>
                     <p className="text-xs md:text-sm text-slate-400 mt-1">Sesuaikan nilai kapasitas nominal (Ah) baterai VRLA untuk kalkulasi SOH dan SOC yang lebih akurat.</p>
                 </div>
             </div>
@@ -107,7 +127,7 @@ function App() {
 
         <DataLogTable logs={logs} />
       </div>
-      <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
+      <SettingsModal isOpen={isSettingsOpen} onClose={handleCloseSettings} />
     </div>
   );
 }
