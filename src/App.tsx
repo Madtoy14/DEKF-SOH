@@ -1,5 +1,4 @@
-import { Zap, ArrowDown, Hourglass, Thermometer, Settings } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { Zap, ArrowDown, Hourglass, Thermometer } from 'lucide-react';
 import { Header } from './components/Header';
 import { StatusBanner } from './components/StatusBanner';
 import { MetricCard } from './components/MetricCard';
@@ -8,7 +7,6 @@ import { RealtimeChart } from './components/RealtimeChart';
 import { DataLogTable } from './components/DataLogTable';
 import { useBatteryData } from './hooks/useBatteryData';
 import { RemoteTuningCard } from './components/RemoteTuningCard';
-import { supabase } from './lib/supabase';
 
 function App() {
   const { data, logs, chartData, isOnline, lastUpdateDate } = useBatteryData();
