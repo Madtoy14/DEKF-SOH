@@ -7,30 +7,11 @@ import { AlertPanel } from './components/AlertPanel';
 import { RealtimeChart } from './components/RealtimeChart';
 import { DataLogTable } from './components/DataLogTable';
 import { useBatteryData } from './hooks/useBatteryData';
-import { SettingsModal } from './components/SettingsModal';
+import { RemoteTuningCard } from './components/RemoteTuningCard';
 import { supabase } from './lib/supabase';
 
 function App() {
   const { data, logs, chartData, isOnline, lastUpdateDate } = useBatteryData();
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [qNominal, setQNominal] = useState<number | null>(null);
-
-  const fetchConfig = async () => {
-    const { data: configData } = await supabase.from('config_baterai').select('q_nominal').eq('id', 1).single();
-    if (configData) {
-      setQNominal(configData.q_nominal);
-    }
-  };
-
-  useEffect(() => {
-    fetchConfig();
-  }, []);
-
-  const handleCloseSettings = () => {
-    setIsSettingsOpen(false);
-    fetchConfig();
-  };
-
   return (
     <div className="min-h-screen p-4 md:p-6 lg:p-8 selection:bg-cyan-500/30">
       <div className="max-w-[1400px] mx-auto space-y-8">
@@ -38,29 +19,7 @@ function App() {
 
         <StatusBanner tegangan={data.tegangan} />
 
-        {/* Setting Kapasitas Card */}
-        <div 
-            onClick={() => setIsSettingsOpen(true)}
-            className="glass-panel p-5 md:p-6 mb-8 flex items-center justify-between group hover:border-cyan-500/50 hover:bg-slate-800/40 transition-all cursor-pointer relative overflow-hidden"
-        >
-            <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/5 to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-            <div className="flex items-center gap-4 md:gap-6 relative z-10">
-                <div className="p-3 md:p-4 bg-slate-800/80 text-cyan-400 border border-cyan-500/30 rounded-xl md:rounded-2xl group-hover:bg-cyan-500/20 group-hover:text-cyan-300 group-hover:shadow-[0_0_20px_rgba(6,182,212,0.4)] transition-all duration-300">
-                    <Settings className="w-6 h-6 md:w-8 md:h-8" />
-                </div>
-                <div>
-                    <h3 className="text-lg md:text-xl font-bold text-slate-100 group-hover:text-cyan-300 transition-colors">
-                      Kapasitas Baterai: {qNominal !== null ? <span className="text-cyan-400">{qNominal} Ah</span> : <span className="text-slate-500 animate-pulse">Memuat...</span>}
-                    </h3>
-                    <p className="text-xs md:text-sm text-slate-400 mt-1">Sesuaikan nilai kapasitas nominal (Ah) baterai VRLA untuk kalkulasi SOH dan SOC yang lebih akurat.</p>
-                </div>
-            </div>
-            <div className="hidden sm:flex relative z-10">
-                <div className="px-4 py-2 bg-cyan-500/20 text-cyan-400 border border-cyan-500/50 rounded-lg font-semibold text-sm group-hover:bg-cyan-500 group-hover:text-slate-900 transition-all shadow-[0_0_10px_rgba(6,182,212,0.2)]">
-                    Ubah Kapasitas
-                </div>
-            </div>
-        </div>
+        <RemoteTuningCard />
 
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 md:gap-8 mb-8">
           <MetricCard
@@ -127,7 +86,6 @@ function App() {
 
         <DataLogTable logs={logs} />
       </div>
-      <SettingsModal isOpen={isSettingsOpen} onClose={handleCloseSettings} />
     </div>
   );
 }
