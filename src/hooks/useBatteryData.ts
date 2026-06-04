@@ -29,12 +29,18 @@ export interface ChartDataPoint {
   soc_dekf: number;
 }
 
+const deriveStatus = (arus: number, dbStatus: string) => {
+  if (arus > 0.05) return 'Discharging';
+  if (arus < -0.05) return 'Charging';
+  return 'Resting';
+};
+
 const calculateEstimasi = (soc: number, arus: number, status: string) => {
   const s = status?.trim().toLowerCase();
   // Charging: arus negatif dari firmware — tampilkan label khusus, bukan jam
   if (s === 'charging') return { jam: 0, menit: 0, standby: false, charging: true };
   // Resting atau arus mendekati nol
-  if (Math.abs(arus) < 0.05) return { jam: 0, menit: 0, standby: true, charging: false };
+  if (Math.abs(arus) <= 0.05) return { jam: 0, menit: 0, standby: true, charging: false };
   // Discharging: hitung sisa waktu pakai nilai absolut arus
   const absArus = Math.abs(arus);
   const kapasitasTersisa = 42.0 * (soc / 100);
@@ -103,16 +109,19 @@ export const useBatteryData = () => {
       });
       setChartData(newChartData);
 
-      const newLogs: LogEntry[] = fetchResult.slice(0, 5).map((item: any) => ({
-         id: item.id || item.created_at,
-         timestamp: new Date(item.created_at).toLocaleTimeString([], { hour12: false }),
-         tegangan: item.tegangan || 0,
-         arus: item.arus || 0,
-         soc_dekf: Math.round(item.soc_dekf || 0), // Format to integer
-         r0_estimasi: item.r0_estimasi || 0,
-         status: item.status || '-',
-         alertLevel: (item.tegangan || 0) < 11.5 ? 'CRITICAL' : 'NORMAL'
-      }));
+      const newLogs: LogEntry[] = fetchResult.slice(0, 5).map((item: any) => {
+         const arusVal = item.arus || 0;
+         return {
+           id: item.id || item.created_at,
+           timestamp: new Date(item.created_at).toLocaleTimeString([], { hour12: false }),
+           tegangan: item.tegangan || 0,
+           arus: arusVal,
+           soc_dekf: Math.round(item.soc_dekf || 0), // Format to integer
+           r0_estimasi: item.r0_estimasi || 0,
+           status: deriveStatus(arusVal, item.status || '-'),
+           alertLevel: (item.tegangan || 0) < 11.5 ? 'CRITICAL' : 'NORMAL'
+         };
+      });
       setLogs(newLogs);
 
       const latest = fetchResult[0];
@@ -124,14 +133,16 @@ export const useBatteryData = () => {
         ? Math.min(Math.max(Math.round(latest.soh), 0), 100)
         : calculateSOH(r0Val);
       
+      const derivedStatus = deriveStatus(arusVal, latest.status || '-');
+      
       setData({
         tegangan: latest.tegangan || 0,
         arus: arusVal,
         soc_dekf: Math.round(socVal), // Format to integer
         r0_estimasi: r0Val,
-        status: latest.status || '-',
+        status: derivedStatus,
         suhu: latest.suhu !== undefined && latest.suhu !== null ? latest.suhu : null,
-        estimasiString: calculateEstimasi(socVal, arusVal, latest.status || '-'),
+        estimasiString: calculateEstimasi(socVal, arusVal, derivedStatus),
         soh: sohVal
       });
 
@@ -178,14 +189,16 @@ export const useBatteryData = () => {
             ? Math.min(Math.max(Math.round(newEntry.soh), 0), 100)
             : calculateSOH(r0Val);
 
+          const derivedStatus = deriveStatus(arusVal, newEntry.status || '-');
+
           setData({
             tegangan: newEntry.tegangan || 0,
             arus: arusVal,
             soc_dekf: Math.round(socVal), // Format to integer
             r0_estimasi: r0Val,
-            status: newEntry.status || '-',
+            status: derivedStatus,
             suhu: newEntry.suhu !== undefined && newEntry.suhu !== null ? newEntry.suhu : null,
-            estimasiString: calculateEstimasi(socVal, arusVal, newEntry.status || '-'),
+            estimasiString: calculateEstimasi(socVal, arusVal, derivedStatus),
             soh: sohVal
           });
 
@@ -200,10 +213,10 @@ export const useBatteryData = () => {
                id: newEntry.id || newEntry.created_at,
                timestamp: time,
                tegangan: newEntry.tegangan || 0,
-               arus: newEntry.arus || 0,
+               arus: arusVal,
                soc_dekf: Math.round(socVal), // Format to integer
                r0_estimasi: newEntry.r0_estimasi || 0,
-               status: newEntry.status || '-',
+               status: derivedStatus,
                alertLevel: (newEntry.tegangan || 0) < 11.5 ? 'CRITICAL' : 'NORMAL'
             };
             const updatedLogs = [newLog, ...prev];
