@@ -29,7 +29,7 @@ export interface ChartDataPoint {
   soc_dekf: number;
 }
 
-const deriveStatus = (arus: number, dbStatus: string) => {
+const deriveStatus = (arus: number) => {
   if (arus > 0.05) return 'Discharging';
   if (arus < -0.05) return 'Charging';
   return 'Resting';
@@ -118,7 +118,7 @@ export const useBatteryData = () => {
            arus: arusVal,
            soc_dekf: Math.round(item.soc_dekf || 0), // Format to integer
            r0_estimasi: item.r0_estimasi || 0,
-           status: deriveStatus(arusVal, item.status || '-'),
+           status: deriveStatus(arusVal),
            alertLevel: (item.tegangan || 0) < 11.5 ? 'CRITICAL' : 'NORMAL'
          };
       });
@@ -133,7 +133,7 @@ export const useBatteryData = () => {
         ? Math.min(Math.max(Math.round(latest.soh), 0), 100)
         : calculateSOH(r0Val);
       
-      const derivedStatus = deriveStatus(arusVal, latest.status || '-');
+      const derivedStatus = deriveStatus(arusVal);
       
       setData({
         tegangan: latest.tegangan || 0,
@@ -189,7 +189,7 @@ export const useBatteryData = () => {
             ? Math.min(Math.max(Math.round(newEntry.soh), 0), 100)
             : calculateSOH(r0Val);
 
-          const derivedStatus = deriveStatus(arusVal, newEntry.status || '-');
+          const derivedStatus = deriveStatus(arusVal);
 
           setData({
             tegangan: newEntry.tegangan || 0,
